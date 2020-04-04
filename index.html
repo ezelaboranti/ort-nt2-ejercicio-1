@@ -14,8 +14,17 @@
 
 
 <div class="container-fluid mt-3" id="app">
-    <input type="text" class="form-control" v-model="criterioDeBusqueda" placeholder="Ingresar un criterio de busqueda...">
+    <input type="text" class="form-control" v-model="criterioDeBusquedaNA"
+        placeholder="Ingresar un criterio de busqueda para el nombre o apellido de la persona...">
+    <input type="text" class="form-control" v-model="criterioDeBusquedaDNI"
+        placeholder="Ingresar un criterio de busqueda para el DNI de la persona...">
     <br>
+
+    <div v-if="!esBusquedaPermitida()" class="alert alert-warning">
+        <h1>Se requieren 3 caracteres minimos para la busqueda</h1>
+    </div>
+    <br>
+
     <div class="card-deck m-0">
         <div class="row">
             <div class="col" v-for="persona in personasFiltradas">
@@ -38,12 +47,12 @@
     new Vue({
         el: '#app',
         data: {
-            criterioDeBusqueda: '',
+            criterioDeBusquedaNA: '',
+            criterioDeBusquedaDNI: '',
             //Aquí, en este array es donde tienen que agregar su información
             personas:
                 [
                     { nombre: 'Daniel', apellido: 'Sánchez', dni: 20442873, correo: 'danielsanchez68@hotmail.com' },
-                    //Agregar aquí nombre, apellido, dni y correo
                     { nombre: 'Ezequiel', apellido: 'Laboranti', dni: 33032717, correo: 'ezelaboranti@hotmail.com' },
                     { nombre: 'Santiago', apellido: 'Castro', dni: 33537569, correo: 'santucastro@live.com.ar' },
                     { nombre: 'Tomas', apellido: 'Melendez', dni: 39847671, correo: 'tomas6melendez@gmail.com' },
@@ -51,21 +60,32 @@
                     { nombre: 'Gonzalo', apellido: 'Garcia Tunon', dni: 38708301, correo: 'garciatunong@gmail.com' },
                     { nombre: 'Eugenio', apellido: 'Sainte Marie', dni: 38707149, correo: 'eugenio.saintemarie@gmail.com' },
                     { nombre: 'Clara', apellido: 'Franzoni', dni: 36626020, correo: 'franzoniclara23@gmail.com' },
-                    { nombre: 'x', apellido: 'y', dni: 0, correo: 'x@y' },
-                    { nombre: 'Ezequiel', apellido: 'Laboranti', dni: 33032717, correo: 'ezelaboranti@hotmail.com' }
                 ]
         },
         computed: {
             personasFiltradas() {
                 return this.personas.filter((persona) => {
-                    let registroCompleto = `${persona.nombre}${persona.apellido}${persona.dni}${persona.correo}`
-                    return registroCompleto.toLowerCase().includes(this.criterioDeBusqueda.toLowerCase())
+                    let registroCompleto = `${persona.nombre}${persona.apellido}`
+                    let registroResto = `${persona.dni}`
+                    return this.esBusquedaPermitida() && registroCompleto.toLowerCase().includes(this.criterioDeBusquedaNA.toLowerCase()) &&
+                        registroResto.includes(this.criterioDeBusquedaDNI.toLowerCase())
                 });
             }
         },
         methods: {
             getNombreCompleto(persona) {
                 return `${persona.nombre} ${persona.apellido}`
+            },
+            esBusquedaMinimaNombre() {
+                return this.criterioDeBusquedaNA.length >= 3 || this.criterioDeBusquedaNA.length == 0
+            },
+
+            esBusquedaMinimaDNI() {
+                return this.criterioDeBusquedaDNI.length == 0 || this.criterioDeBusquedaDNI.length >= 3
+            },
+
+            esBusquedaPermitida() {
+                return this.esBusquedaMinimaNombre() && this.esBusquedaMinimaDNI()
             }
         }
     });
